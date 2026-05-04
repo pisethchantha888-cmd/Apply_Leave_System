@@ -28,6 +28,12 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+        .login-container { min-height: 100vh; display: flex; }
+        .login-left { flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .login-right { flex: 1; display: flex; align-items: center; justify-content: center; background: #f8fafc; }
+        .floating-icon { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        .input-focus:focus { box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -85,42 +91,84 @@
     <!-- Main Content -->
     <div class="ml-64 min-h-screen">
         <!-- Login Page -->
-        <div id="login" class="min-h-screen gradient-bg flex items-center justify-center p-4">
-            <div class="max-w-md w-full">
-                <div class="glass rounded-2xl shadow-2xl p-8">
+        <div id="login" class="login-container">
+            <!-- Left Side - Branding -->
+            <div class="login-left hidden md:flex">
+                <div class="text-center text-white max-w-md">
+                    <div class="floating-icon mb-8">
+                        <div class="w-32 h-32 bg-white bg-opacity-20 rounded-full mx-auto flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-white text-6xl"></i>
+                        </div>
+                    </div>
+                    <h1 class="text-4xl font-bold mb-4">HR Leave Management</h1>
+                    <p class="text-xl mb-8 text-white text-opacity-90">Streamline your leave requests with our professional management system</p>
+                    <div class="space-y-4 text-left max-w-sm mx-auto">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check text-white"></i>
+                            </div>
+                            <span class="text-white text-opacity-90">Easy leave application process</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                            <span class="text-white text-opacity-90">Real-time approval tracking</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-bar text-white"></i>
+                            </div>
+                            <span class="text-white text-opacity-90">Comprehensive dashboards</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Login Form -->
+            <div class="login-right w-full md:w-1/2">
+                <div class="max-w-md w-full p-8">
                     <div class="text-center mb-8">
-                        <div class="w-20 h-20 gradient-bg rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <div class="w-20 h-20 gradient-bg rounded-full mx-auto mb-4 flex items-center justify-center md:hidden">
                             <i class="fas fa-calendar-check text-white text-3xl"></i>
                         </div>
                         <h2 class="text-3xl font-bold text-gray-800">Welcome Back</h2>
-                        <p class="text-gray-600 mt-2">Sign in to HR Leave Management</p>
+                        <p class="text-gray-600 mt-2">Sign in to your account</p>
                     </div>
                     <form onsubmit="login(event)">
                         <div class="mb-4">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">User ID</label>
                             <div class="relative">
-                                <i class="fas fa-user absolute left-3 top-3 text-gray-400"></i>
-                                <input id="userid" type="text" placeholder="Enter your ID" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+                                <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input id="userid" type="text" placeholder="Enter your ID" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus focus:border-indigo-500">
                             </div>
                         </div>
                         <div class="mb-6">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
                             <div class="relative">
-                                <i class="fas fa-lock absolute left-3 top-3 text-gray-400"></i>
-                                <input id="pass" type="password" placeholder="Enter your password" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+                                <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input id="pass" type="password" placeholder="Enter your password" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus focus:border-indigo-500">
                             </div>
                         </div>
                         <div id="error" class="hidden text-red-600 text-sm mb-4 text-center bg-red-50 p-3 rounded-lg">
                             <i class="fas fa-exclamation-circle mr-2"></i>Invalid credentials
                         </div>
-                        <button type="submit" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
+                        <button type="submit" class="btn-primary w-full text-white py-3 rounded-lg font-semibold text-lg">
                             <i class="fas fa-sign-in-alt mr-2"></i>Sign In
                         </button>
                     </form>
                     <div class="mt-6 text-center text-sm text-gray-600">
-                        <p>Demo Credentials:</p>
-                        <p class="mt-1">Admin: <code class="bg-gray-100 px-2 py-1 rounded">admin / admin123</code></p>
-                        <p>User: <code class="bg-gray-100 px-2 py-1 rounded">piseth / 123456</code></p>
+                        <p class="mb-2">Demo Credentials:</p>
+                        <div class="space-y-2">
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <p class="font-semibold text-gray-700">Admin Access</p>
+                                <code class="text-indigo-600">admin / admin123</code>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <p class="font-semibold text-gray-700">User Access</p>
+                                <code class="text-indigo-600">piseth / 123456</code>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -209,16 +257,16 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                                    <input id="name" type="text" placeholder="Enter your name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                    <input id="name" type="text" placeholder="Enter your name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus focus:border-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Employee ID</label>
-                                    <input id="empid" type="text" placeholder="Enter employee ID" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                    <input id="empid" type="text" placeholder="Enter employee ID" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus focus:border-indigo-500">
                                 </div>
                             </div>
                             <div class="mb-6">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Leave Type</label>
-                                <select id="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                <select id="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus focus:border-indigo-500">
                                     <option value="Annual Leave">Annual Leave</option>
                                     <option value="Sick Leave">Sick Leave</option>
                                     <option value="Personal Leave">Personal Leave</option>
@@ -228,18 +276,18 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
-                                    <input id="start" type="date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                    <input id="start" type="date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus focus:border-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
-                                    <input id="end" type="date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                    <input id="end" type="date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus focus:border-indigo-500">
                                 </div>
                             </div>
                             <div class="mb-6">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Reason</label>
-                                <textarea id="reason" rows="4" placeholder="Enter reason for leave" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500"></textarea>
+                                <textarea id="reason" rows="4" placeholder="Enter reason for leave" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus focus:border-indigo-500"></textarea>
                             </div>
-                            <button type="submit" class="btn-primary text-white px-8 py-3 rounded-lg font-semibold">
+                            <button type="submit" class="btn-primary text-white px-8 py-3 rounded-lg font-semibold text-lg">
                                 <i class="fas fa-paper-plane mr-2"></i>Submit Application
                             </button>
                         </form>
@@ -495,7 +543,7 @@
                                   'text-yellow-600 bg-yellow-50';
                 const tr = document.createElement('tr');
                 tr.className = 'border-b hover:bg-gray-50';
-                tr.innerHTML = '<td class="p-4">' + l.name + '</td><td class="p-4">' + l.start + '</td><td class="p-4">' + l.end + '</td><td class="p-4">' + l.type + '</td><td class="p-4"><span class="px-3 py-1 rounded-full text-sm font-semibold ' + statusColor + '">' + l.status + '</span></td>';
+                tr.innerHTML = '<td class="p-4 font-semibold">' + l.name + '</td><td class="p-4">' + l.start + '</td><td class="p-4">' + l.end + '</td><td class="p-4">' + l.type + '</td><td class="p-4"><span class="px-3 py-1 rounded-full text-sm font-semibold ' + statusColor + '">' + l.status + '</span></td>';
                 tbody.appendChild(tr);
             });
         }
@@ -603,5 +651,3 @@
     </script>
 </body>
 </html>
-< ! - -   D e p l o y e d :   0 5 / 0 4 / 2 0 2 6   1 4 : 1 1 : 5 5   - - >  
- 
