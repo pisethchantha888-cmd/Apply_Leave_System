@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Leave Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .hidden { display: none !important; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .sidebar-item { transition: all 0.2s ease; }
+        .sidebar-item:hover { background: rgba(102, 126, 234, 0.1); border-left: 3px solid #667eea; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-card-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-card-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-card-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <div class="w-64 bg-white shadow-xl h-screen fixed left-0 top-0 overflow-y-auto z-30">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-check text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-gray-800">HR Leave</h1>
+                    <p class="text-xs text-gray-500">Management System</p>
+                </div>
+            </div>
+        </div>
+        <nav class="p-4 space-y-2">
+            <button onclick="goTo('dashboard')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 text-gray-700">
+                <i class="fas fa-chart-line w-5"></i>
+                <span>Dashboard</span>
+            </button>
+            <button onclick="goTo('apply')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 text-gray-700">
+                <i class="fas fa-plus-circle w-5"></i>
+                <span>Apply Leave</span>
+            </button>
+            <button onclick="goTo('my-leaves')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 text-gray-700">
+                <i class="fas fa-list-alt w-5"></i>
+                <span>My Leaves</span>
+            </button>
+            <button onclick="goTo('manager')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 text-gray-700 hidden" id="nav-manager">
+                <i class="fas fa-tasks w-5"></i>
+                <span>Approvals</span>
+            </button>
+            <button onclick="goTo('users')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 text-gray-700 hidden" id="nav-users">
+                <i class="fas fa-users-cog w-5"></i>
+                <span>Manage Users</span>
+            </button>
+        </nav>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
+            <div class="flex items-center space-x-3 mb-3 px-4">
+                <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-white text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-gray-800" id="sidebarUserName">User</p>
+                    <p class="text-xs text-gray-500" id="sidebarUserRole">Role</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 min-h-screen">
+        <!-- Login Page -->
+        <div id="login" class="min-h-screen gradient-bg flex items-center justify-center p-4">
+            <div class="max-w-md w-full">
+                <div class="glass rounded-2xl shadow-2xl p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 gradient-bg rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-white text-3xl"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-gray-800">Welcome Back</h2>
+                        <p class="text-gray-600 mt-2">Sign in to HR Leave Management</p>
+                    </div>
+                    <form onsubmit="login(event)">
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">User ID</label>
+                            <div class="relative">
+                                <i class="fas fa-user absolute left-3 top-3 text-gray-400"></i>
+                                <input id="userid" type="text" placeholder="Enter your ID" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                            <div class="relative">
+                                <i class="fas fa-lock absolute left-3 top-3 text-gray-400"></i>
+                                <input id="pass" type="password" placeholder="Enter your password" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+                            </div>
+                        </div>
+                        <div id="error" class="hidden text-red-600 text-sm mb-4 text-center bg-red-50 p-3 rounded-lg">
+                            <i class="fas fa-exclamation-circle mr-2"></i>Invalid credentials
+                        </div>
+                        <button type="submit" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                        </button>
+                    </form>
+                    <div class="mt-6 text-center text-sm text-gray-600">
+                        <p>Demo Credentials:</p>
+                        <p class="mt-1">Admin: <code class="bg-gray-100 px-2 py-1 rounded">admin / admin123</code></p>
+                        <p>User: <code class="bg-gray-100 px-2 py-1 rounded">piseth / 123456</code></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- App Content -->
+        <div id="app" class="hidden p-8">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800" id="welcomeText">Welcome</h2>
+                <p class="text-gray-600 mt-1">Manage your leave requests efficiently</p>
+            </div>
+
+            <!-- Dashboard -->
+            <div id="dashboard">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card rounded-xl shadow-lg p-6 text-white card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-white text-opacity-80 text-sm">Total Leaves</p>
+                                <p class="text-3xl font-bold mt-2" id="statTotal">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card-2 rounded-xl shadow-lg p-6 text-white card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-white text-opacity-80 text-sm">Pending</p>
+                                <p class="text-3xl font-bold mt-2" id="statPending">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card-3 rounded-xl shadow-lg p-6 text-white card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-white text-opacity-80 text-sm">Approved</p>
+                                <p class="text-3xl font-bold mt-2" id="statApproved">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check-circle text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card-4 rounded-xl shadow-lg p-6 text-white card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-white text-opacity-80 text-sm">Rejected</p>
+                                <p class="text-3xl font-bold mt-2" id="statRejected">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-times-circle text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-chart-pie mr-2 text-indigo-600"></i>Leave Statistics
+                        </h3>
+                        <canvas id="leaveChart" style="max-height: 300px;"></canvas>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-calendar-alt mr-2 text-indigo-600"></i>Approved Leaves Calendar
+                        </h3>
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apply Leave -->
+            <div id="apply" class="hidden">
+                <div class="max-w-2xl">
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                            <i class="fas fa-paper-plane mr-2 text-indigo-600"></i>Apply for Leave
+                        </h3>
+                        <form onsubmit="submitLeave(event)">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                                    <input id="name" type="text" placeholder="Enter your name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Employee ID</label>
+                                    <input id="empid" type="text" placeholder="Enter employee ID" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Leave Type</label>
+                                <select id="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                    <option value="Annual Leave">Annual Leave</option>
+                                    <option value="Sick Leave">Sick Leave</option>
+                                    <option value="Personal Leave">Personal Leave</option>
+                                    <option value="Maternity Leave">Maternity Leave</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
+                                    <input id="start" type="date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
+                                    <input id="end" type="date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Reason</label>
+                                <textarea id="reason" rows="4" placeholder="Enter reason for leave" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500"></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary text-white px-8 py-3 rounded-lg font-semibold">
+                                <i class="fas fa-paper-plane mr-2"></i>Submit Application
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Leaves -->
+            <div id="my-leaves" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-history mr-2 text-indigo-600"></i>My Leave History
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Name</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Start Date</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">End Date</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Type</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manager Approvals -->
+            <div id="manager" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-clipboard-check mr-2 text-indigo-600"></i>Pending Approvals
+                        </h3>
+                        <button onclick="loadLeaves()" class="btn-primary text-white px-6 py-2 rounded-lg font-semibold">
+                            <i class="fas fa-sync-alt mr-2"></i>Refresh
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Name</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Period</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Type</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Reason</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="managerBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Users -->
+            <div id="users" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-users mr-2 text-indigo-600"></i>Manage Users
+                        </h3>
+                        <button onclick="showAddUser()" class="btn-primary text-white px-6 py-2 rounded-lg font-semibold">
+                            <i class="fas fa-user-plus mr-2"></i>Add User
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">ID</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Name</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Role</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let leaves = [];
+        let users = [];
+        let currentUser = JSON.parse(sessionStorage.getItem('hr_currentUser') || 'null');
+        let calendar = null;
+        let leaveChart = null;
+
+        function initData() {
+            const storedUsers = localStorage.getItem('hr_users');
+            const storedLeaves = localStorage.getItem('hr_leaves');
+
+            if (storedUsers) {
+                users = JSON.parse(storedUsers);
+            } else {
+                users = [
+                    { id: "admin", password: "admin123", name: "Admin", role: "manager" },
+                    { id: "piseth", password: "123456", name: "Piseth", role: "user" }
+                ];
+                localStorage.setItem('hr_users', JSON.stringify(users));
+            }
+
+            if (storedLeaves) {
+                leaves = JSON.parse(storedLeaves);
+            } else {
+                leaves = [];
+                localStorage.setItem('hr_leaves', JSON.stringify(leaves));
+            }
+        }
+
+        function saveUsers() {
+            localStorage.setItem('hr_users', JSON.stringify(users));
+        }
+
+        function saveLeaves() {
+            localStorage.setItem('hr_leaves', JSON.stringify(leaves));
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initData();
+            if (currentUser && currentUser.id) {
+                showApp();
+            }
+        });
+
+        function login(e) {
+            e.preventDefault();
+            const user = users.find(u => u.id === userid.value && u.password === pass.value);
+
+            if (user) {
+                currentUser = { id: user.id, role: user.role, name: user.name };
+                sessionStorage.setItem('hr_currentUser', JSON.stringify(currentUser));
+                showApp();
+            } else {
+                document.getElementById('error').classList.remove('hidden');
+            }
+        }
+
+        function showApp() {
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('login').classList.add('hidden');
+            document.getElementById('nav-manager').classList.toggle('hidden', currentUser.role !== 'manager');
+            document.getElementById('nav-users').classList.toggle('hidden', currentUser.role !== 'manager');
+            document.getElementById('welcomeText').textContent = 'Welcome, ' + currentUser.name;
+            document.getElementById('sidebarUserName').textContent = currentUser.name;
+            document.getElementById('sidebarUserRole').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+            goTo('dashboard');
+        }
+
+        function goTo(section) {
+            ['dashboard','apply','my-leaves','manager','users'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(section).classList.remove('hidden');
+            if (section === 'my-leaves') renderMyLeaves();
+            if (section === 'manager') renderManagerTable();
+            if (section === 'users') renderUsersTable();
+            if (section === 'dashboard') { updateStats(); renderCalendar(); renderChart(); }
+        }
+
+        function updateStats() {
+            document.getElementById('statTotal').textContent = leaves.length;
+            document.getElementById('statPending').textContent = leaves.filter(l => l.status === 'pending').length;
+            document.getElementById('statApproved').textContent = leaves.filter(l => l.status === 'approved').length;
+            document.getElementById('statRejected').textContent = leaves.filter(l => l.status === 'rejected').length;
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('leaveChart').getContext('2d');
+            if (leaveChart) leaveChart.destroy();
+
+            const pending = leaves.filter(l => l.status === 'pending').length;
+            const approved = leaves.filter(l => l.status === 'approved').length;
+            const rejected = leaves.filter(l => l.status === 'rejected').length;
+
+            leaveChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'Approved', 'Rejected'],
+                    datasets: [{
+                        data: [pending, approved, rejected],
+                        backgroundColor: ['#f5576c', '#4facfe', '#43e97b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCalendar() {
+            const calEl = document.getElementById('calendar');
+            calEl.innerHTML = '';
+            calendar = new FullCalendar.Calendar(calEl, {
+                initialView: 'dayGridMonth',
+                events: leaves.filter(l => l.status === 'approved').map(l => ({
+                    title: l.name + ' - ' + l.type,
+                    start: l.start,
+                    end: l.end,
+                    allDay: true,
+                    backgroundColor: '#667eea',
+                    borderColor: '#667eea'
+                })),
+                height: 300,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth'
+                }
+            });
+            calendar.render();
+        }
+
+        function submitLeave(e) {
+            e.preventDefault();
+            const newLeave = {
+                id: Date.now(),
+                userId: currentUser.id,
+                name: name.value,
+                empid: empid.value,
+                type: type.value,
+                start: start.value,
+                end: end.value,
+                reason: reason.value,
+                status: 'pending'
+            };
+            leaves.push(newLeave);
+            saveLeaves();
+            alert('Leave application submitted successfully!');
+            goTo('dashboard');
+        }
+
+        function renderMyLeaves() {
+            const tbody = document.getElementById('historyBody');
+            tbody.innerHTML = '';
+            leaves.forEach(l => {
+                const statusColor = l.status === 'approved' ? 'text-green-600 bg-green-50' : 
+                                  l.status === 'rejected' ? 'text-red-600 bg-red-50' : 
+                                  'text-yellow-600 bg-yellow-50';
+                const tr = document.createElement('tr');
+                tr.className = 'border-b hover:bg-gray-50';
+                tr.innerHTML = '<td class="p-4">' + l.name + '</td><td class="p-4">' + l.start + '</td><td class="p-4">' + l.end + '</td><td class="p-4">' + l.type + '</td><td class="p-4"><span class="px-3 py-1 rounded-full text-sm font-semibold ' + statusColor + '">' + l.status + '</span></td>';
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderManagerTable() {
+            const tbody = document.getElementById('managerBody');
+            tbody.innerHTML = '';
+            leaves.forEach(l => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b hover:bg-gray-50';
+                const statusColor = l.status === 'approved' ? 'text-green-600 bg-green-50' : 
+                                  l.status === 'rejected' ? 'text-red-600 bg-red-50' : 
+                                  'text-yellow-600 bg-yellow-50';
+                tr.innerHTML = '<td class="p-4 font-semibold">' + l.name + '</td><td class="p-4">' + l.start + ' to ' + l.end + '</td><td class="p-4">' + l.type + '</td><td class="p-4 text-sm text-gray-600">' + l.reason + '</td><td class="p-4"><span class="px-3 py-1 rounded-full text-sm font-semibold ' + statusColor + '">' + l.status + '</span></td><td class="p-4">' +
+                    (l.status === 'pending' ? '<button onclick="approveLeave(' + l.id + ')" class="bg-green-600 text-white px-4 py-2 rounded-lg mr-2 hover:bg-green-700 transition"><i class="fas fa-check mr-1"></i>Approve</button> <button onclick="rejectLeave(' + l.id + ')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"><i class="fas fa-times mr-1"></i>Reject</button>' : '') +
+                    '</td>';
+                tbody.appendChild(tr);
+            });
+        }
+
+        function approveLeave(id) {
+            const idx = leaves.findIndex(l => l.id == id);
+            if (idx !== -1) {
+                leaves[idx].status = 'approved';
+                saveLeaves();
+                sendTelegram(leaves[idx], 'approved');
+                alert('Leave approved successfully!');
+                renderManagerTable();
+                updateStats();
+                renderCalendar();
+                renderChart();
+            }
+        }
+
+        function rejectLeave(id) {
+            if (!confirm('Are you sure you want to reject this leave?')) return;
+            const idx = leaves.findIndex(l => l.id == id);
+            if (idx !== -1) {
+                leaves[idx].status = 'rejected';
+                saveLeaves();
+                sendTelegram(leaves[idx], 'rejected');
+                alert('Leave rejected!');
+                renderManagerTable();
+                updateStats();
+                renderCalendar();
+                renderChart();
+            }
+        }
+
+        function sendTelegram(leave, action) {
+            fetch('https://api.telegram.org/bot8526420178:AAGtj7ihoUcrfZkpypbKVnv_lZ6GbnRNHWI/sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: '-1003558471218',
+                    text: 'Leave ' + action + ': ' + leave.name + '\nFrom: ' + leave.start + '\nTo: ' + leave.end + '\nReason: ' + leave.reason
+                })
+            }).catch(e => console.error(e));
+        }
+
+        function renderUsersTable() {
+            if (currentUser.role !== 'manager') { alert('Access denied'); goTo('dashboard'); return; }
+            const tbody = document.getElementById('usersBody');
+            tbody.innerHTML = '';
+            users.forEach((u, i) => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b hover:bg-gray-50';
+                const roleColor = u.role === 'manager' ? 'text-purple-600 bg-purple-50' : 'text-blue-600 bg-blue-50';
+                tr.innerHTML = '<td class="p-4 font-semibold">' + u.id + '</td><td class="p-4">' + u.name + '</td><td class="p-4"><span class="px-3 py-1 rounded-full text-sm font-semibold ' + roleColor + '">' + u.role + '</span></td><td class="p-4"><button onclick="deleteUser(' + i + ')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"><i class="fas fa-trash mr-1"></i>Delete</button></td>';
+                tbody.appendChild(tr);
+            });
+        }
+
+        function showAddUser() {
+            const id = prompt('User ID:');
+            const name = prompt('Name:');
+            const pass = prompt('Password:');
+            const role = confirm('Is this user a manager?') ? 'manager' : 'user';
+            if (!id || !name || !pass) { alert('All fields are required!'); return; }
+            if (users.find(u => u.id === id)) {
+                alert('User ID already exists!');
+                return;
+            }
+            users.push({ id, name, password: pass, role });
+            saveUsers();
+            renderUsersTable();
+            alert('User added successfully!');
+        }
+
+        function deleteUser(i) {
+            if (users[i].id === 'admin') return alert('Cannot delete admin!');
+            if (!confirm('Are you sure you want to delete this user?')) return;
+            users.splice(i, 1);
+            saveUsers();
+            renderUsersTable();
+            alert('User deleted successfully!');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                sessionStorage.removeItem('hr_currentUser');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "leave-management-system",
+  "version": "1.0.0",
+  "description": "HR Leave Management System - Professional deployment on Netlify",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'Static site - no build required'",
+    "start": "npx serve ."
+  },
+  "keywords": ["leave-management", "hr", "netlify"],
+  "author": "",
+  "license": "MIT"
+}
